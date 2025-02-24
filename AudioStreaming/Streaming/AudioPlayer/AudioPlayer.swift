@@ -198,8 +198,8 @@ open class AudioPlayer {
     /// - parameter source: A `CoreAudioStreamSource` that will providing streaming data
     /// - parameter entryId: A `String` that provides a unique id for this item
     /// - parameter format: An `AVAudioFormat` the format of this audio source
-    public func play(source: CoreAudioStreamSource, entryId: String, format: AVAudioFormat) {
-        let audioEntry = AudioEntry(source: source, entryId: AudioEntryId(id: entryId), outputAudioFormat: format)
+    public func play(source: CoreAudioStreamSource, id: UUID, url: URL, format: AVAudioFormat) {
+        let audioEntry = AudioEntry(source: source, entryId: AudioEntryId(id: id, url: url), outputAudioFormat: format)
         play(audioEntry: audioEntry)
     }
 
@@ -257,8 +257,8 @@ open class AudioPlayer {
         queue(urls: urls, headers: [:])
     }
 
-    public func queue(url: URL, after afterUrl: URL) {
-        queue(url: url, headers: [:], after: afterUrl)
+    public func queue(url: URL, after afterId: UUID) {
+        queue(url: url, headers: [:], after: afterId)
     }
 
     /// Queues the specified audio stream
@@ -266,8 +266,8 @@ open class AudioPlayer {
     /// - parameter source: A `CoreAudioStreamSource` that will providing streaming data
     /// - parameter entryId: A `String` that provides a unique id for this item
     /// - parameter format: An `AVAudioFormat` the format of this audio source
-    public func queue(source: CoreAudioStreamSource, entryId: String, format: AVAudioFormat) {
-        let audioEntry = AudioEntry(source: source, entryId: AudioEntryId(id: entryId), outputAudioFormat: format)
+    public func queue(source: CoreAudioStreamSource, id: UUID, url: URL, format: AVAudioFormat) {
+        let audioEntry = AudioEntry(source: source, entryId: AudioEntryId(id: id, url: url), outputAudioFormat: format)
         queue(audioEntry: audioEntry)
     }
 
@@ -289,10 +289,10 @@ open class AudioPlayer {
     
     public func removeFromQueue(id: UUID) {
         serializationQueue.sync {
-            if let item = entriesQueue.items(type: .upcoming).first(where: { $0.id.unique == id }) {
+            if let item = entriesQueue.items(type: .upcoming).first(where: { $0.id.id == id }) {
                 entriesQueue.remove(item: item, type: .upcoming)
 
-                if playerContext.audioPlayingEntry?.id.unique == item.id.unique {
+                if playerContext.audioPlayingEntry?.id.id == item.id.id {
                     stop(clearQueue: false)
                 }
             }
@@ -307,9 +307,9 @@ open class AudioPlayer {
     ///
     /// - Parameter url: A `URL` specifying the audio content to be played.
     /// - parameter headers: A `Dictionary` specifying any additional headers to be pass to the network request.
-    public func queue(url: URL, id: UUID? = nil, headers: [String: String], after afterUrl: URL? = nil) {
+    public func queue(url: URL, id: UUID? = nil, headers: [String: String], after afterId: UUID? = nil) {
         let audioEntry = entryProvider.provideAudioEntry(url: url, id: id, headers: headers)
-        queue(audioEntry: audioEntry, after: afterUrl)
+        queue(audioEntry: audioEntry, after: afterId)
     }
 
     /// Queues the specified URLs
@@ -330,11 +330,27 @@ open class AudioPlayer {
         }
     }
 
-    private func queue(audioEntry: AudioEntry, after afterUrl: URL? = nil) {
+//    private func queue(audioEntry: AudioEntry, after afterUrl: URL? = nil) {
+//        serializationQueue.sync {
+//            audioEntry.delegate = self
+//            if let afterUrl = afterUrl {
+//                if let afterUrlEntry = entriesQueue.items(type: .upcoming).first(where: { $0.id.id == afterUrl.absoluteString }) {
+//                    entriesQueue.insert(item: audioEntry, type: .upcoming, after: afterUrlEntry)
+//                }
+//            } else {
+//                entriesQueue.enqueue(item: audioEntry, type: .upcoming)
+//            }
+//        }
+//        checkRenderWaitingAndNotifyIfNeeded()
+//        sourceQueue.async { [weak self] in
+//            self?.processSource()
+//        }
+//    }
+    private func queue(audioEntry: AudioEntry, after id: UUID? = nil) {
         serializationQueue.sync {
             audioEntry.delegate = self
-            if let afterUrl = afterUrl {
-                if let afterUrlEntry = entriesQueue.items(type: .upcoming).first(where: { $0.id.id == afterUrl.absoluteString }) {
+            if let id {
+                if let afterUrlEntry = entriesQueue.items(type: .upcoming).first(where: { $0.id.id == id }) {
                     entriesQueue.insert(item: audioEntry, type: .upcoming, after: afterUrlEntry)
                 }
             } else {
@@ -761,7 +777,7 @@ open class AudioPlayer {
             }
             playerContext.entriesLock.lock()
             playerContext.audioPlayingEntry = nextEntry
-            let playingQueueEntryId = playerContext.audioPlayingEntry?.id ?? AudioEntryId(id: "")
+            
             playerContext.entriesLock.unlock()
 
             if let entry = entry, !isPlayingSameItemProbablySeek {
@@ -782,9 +798,11 @@ open class AudioPlayer {
             }
             if !isPlayingSameItemProbablySeek {
                 playerContext.setInternalState(to: .waitingForData)
-
+                let playingQueueEntryId = playerContext.audioPlayingEntry?.id
+                
                 asyncOnMain { [weak self] in
-                    guard let self = self else { return }
+                    guard let self = self,
+                          let playingQueueEntryId else { return }
                     self.delegate?.audioPlayerDidStartPlaying(player: self, with: playingQueueEntryId)
                 }
             }

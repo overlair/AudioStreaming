@@ -6,15 +6,15 @@
 import AudioToolbox
 import AVFoundation
 
-public struct AudioEntryId: Equatable {
+public struct AudioEntryId: Hashable {
 
-    public init(unique: UUID = UUID(), id: String) {
-        self.unique = unique
+    public init(id: UUID = UUID(), url: URL) {
         self.id = id
+        self.url = url
     }
     
-    public var unique: UUID
-    public var id: String
+    public var id: UUID
+    public var url: URL
     
 }
 

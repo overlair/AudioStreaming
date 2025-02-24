@@ -27,8 +27,8 @@ final class AudioEntryProvider: AudioEntryProviding {
     func provideAudioEntry(url: URL, id: UUID? = nil, headers: [String: String]) -> AudioEntry {
         let source = self.source(for: url, headers: headers)
         return AudioEntry(source: source,
-                          entryId: AudioEntryId(unique: id ?? UUID(),
-                                                id: url.absoluteString),
+                          entryId: AudioEntryId(id: id ?? UUID(),
+                                                url: url),
                           outputAudioFormat: outputAudioFormat)
     }
 
@@ -48,9 +48,11 @@ final class AudioEntryProvider: AudioEntryProviding {
     }
 
     func source(for url: URL, headers: [String: String]) -> CoreAudioStreamSource {
-        guard !url.isFileURL else {
+        // hacky, fix for ipod-library
+        if url.isFileURL || url.scheme == "ipod-library" {
             return provideFileAudioSource(url: url)
+        } else {
+            return provideAudioSource(url: url, headers: headers)
         }
-        return provideAudioSource(url: url, headers: headers)
     }
 }
