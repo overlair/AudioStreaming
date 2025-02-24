@@ -271,12 +271,28 @@ open class AudioPlayer {
         queue(audioEntry: audioEntry)
     }
 
-    public func removeFromQueue(url: URL) {
+//    public func removeFromQueue(url: URL) {
+//        serializationQueue.sync {
+//            if let item = entriesQueue.items(type: .upcoming).first(where: { $0.id.id == url.absoluteString }) {
+//                entriesQueue.remove(item: item, type: .upcoming)
+//
+//                if playerContext.audioPlayingEntry?.id.id == item.id.id {
+//                    stop(clearQueue: false)
+//                }
+//            }
+//        }
+//        checkRenderWaitingAndNotifyIfNeeded()
+//        sourceQueue.async { [weak self] in
+//            self?.processSource()
+//        }
+//    }
+    
+    public func removeFromQueue(id: UUID) {
         serializationQueue.sync {
-            if let item = entriesQueue.items(type: .upcoming).first(where: { $0.id.id == url.absoluteString }) {
+            if let item = entriesQueue.items(type: .upcoming).first(where: { $0.id.unique == id }) {
                 entriesQueue.remove(item: item, type: .upcoming)
 
-                if playerContext.audioPlayingEntry?.id.id == item.id.id {
+                if playerContext.audioPlayingEntry?.id.unique == item.id.unique {
                     stop(clearQueue: false)
                 }
             }
