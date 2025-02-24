@@ -48,8 +48,7 @@ final class AudioEntryProvider: AudioEntryProviding {
     }
 
     func source(for url: URL, headers: [String: String]) -> CoreAudioStreamSource {
-        // hacky, fix for ipod-library
-        if url.isFileURL || url.scheme == "ipod-library" {
+        if url.isFileURL {
             return provideFileAudioSource(url: url)
         } else {
             return provideAudioSource(url: url, headers: headers)
