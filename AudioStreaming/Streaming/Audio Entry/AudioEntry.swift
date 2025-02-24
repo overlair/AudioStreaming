@@ -7,8 +7,15 @@ import AudioToolbox
 import AVFoundation
 
 public struct AudioEntryId: Equatable {
-    var unique = UUID()
+
+    public init(unique: UUID = UUID(), id: String) {
+        self.unique = unique
+        self.id = id
+    }
+    
+    public var unique: UUID
     public var id: String
+    
 }
 
 class AudioEntry {
