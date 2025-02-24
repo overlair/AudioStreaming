@@ -6,8 +6,8 @@
 import AVFoundation
 
 protocol AudioEntryProviding {
-    func provideAudioEntry(url: URL, headers: [String: String]) -> AudioEntry
-    func provideAudioEntry(url: URL) -> AudioEntry
+    func provideAudioEntry(url: URL, id: UUID?, headers: [String: String]) -> AudioEntry
+    func provideAudioEntry(url: URL, id: UUID?) -> AudioEntry
 }
 
 final class AudioEntryProvider: AudioEntryProviding {
@@ -24,15 +24,16 @@ final class AudioEntryProvider: AudioEntryProviding {
         self.outputAudioFormat = outputAudioFormat
     }
 
-    func provideAudioEntry(url: URL, headers: [String: String]) -> AudioEntry {
+    func provideAudioEntry(url: URL, id: UUID? = nil, headers: [String: String]) -> AudioEntry {
         let source = self.source(for: url, headers: headers)
         return AudioEntry(source: source,
-                          entryId: AudioEntryId(id: url.absoluteString),
+                          entryId: AudioEntryId(unique: id ?? UUID(),
+                                                id: url.absoluteString),
                           outputAudioFormat: outputAudioFormat)
     }
 
-    func provideAudioEntry(url: URL) -> AudioEntry {
-        provideAudioEntry(url: url, headers: [:])
+    func provideAudioEntry(url: URL, id: UUID? = nil) -> AudioEntry {
+        provideAudioEntry(url: url, id: id, headers: [:])
     }
 
     func provideAudioSource(url: URL, headers: [String: String]) -> AudioStreamSource {

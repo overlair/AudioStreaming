@@ -180,16 +180,16 @@ open class AudioPlayer {
     /// Starts the audio playback for the given URL
     ///
     /// - parameter url: A `URL` specifying the audio context to be played
-    public func play(url: URL) {
-        play(url: url, headers: [:])
+    public func play(url: URL, id: UUID? = nil) {
+        play(url: url, id: id, headers: [:])
     }
 
     /// Starts the audio playback for the given URL
     ///
     /// - parameter url: A `URL` specifying the audio context to be played.
     /// - parameter headers: A `Dictionary` specifying any additional headers to be pass to the network request.
-    public func play(url: URL, headers: [String: String]) {
-        let audioEntry = entryProvider.provideAudioEntry(url: url, headers: headers)
+    public func play(url: URL, id: UUID? = nil, headers: [String: String]) {
+        let audioEntry = entryProvider.provideAudioEntry(url: url, id: id, headers: headers)
         play(audioEntry: audioEntry)
     }
 
@@ -291,8 +291,8 @@ open class AudioPlayer {
     ///
     /// - Parameter url: A `URL` specifying the audio content to be played.
     /// - parameter headers: A `Dictionary` specifying any additional headers to be pass to the network request.
-    public func queue(url: URL, headers: [String: String], after afterUrl: URL? = nil) {
-        let audioEntry = entryProvider.provideAudioEntry(url: url, headers: headers)
+    public func queue(url: URL, id: UUID? = nil, headers: [String: String], after afterUrl: URL? = nil) {
+        let audioEntry = entryProvider.provideAudioEntry(url: url, id: id, headers: headers)
         queue(audioEntry: audioEntry, after: afterUrl)
     }
 
@@ -300,10 +300,10 @@ open class AudioPlayer {
     ///
     /// - Parameter url: A array of `URL`s specifying the audio content to be played.
     /// - parameter headers: A `Dictionary` specifying any additional headers to be pass to the network request.
-    public func queue(urls: [URL], headers: [String: String]) {
+    public func queue(urls: [URL], id: UUID? = nil, headers: [String: String]) {
         serializationQueue.sync {
             for url in urls {
-                let audioEntry = entryProvider.provideAudioEntry(url: url, headers: headers)
+                let audioEntry = entryProvider.provideAudioEntry(url: url, id: id, headers: headers)
                 audioEntry.delegate = self
                 entriesQueue.enqueue(item: audioEntry, type: .upcoming)
             }
