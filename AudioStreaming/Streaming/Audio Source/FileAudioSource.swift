@@ -128,6 +128,12 @@ final class FileAudioSource: NSObject, CoreAudioStreamSource {
                         }
                     } catch {
                         delegate?.errorOccurred(source: self, error: error)
+
+                        // should we just ignore error and not optimize??
+                        mp4IsAlreadyOptimized = true
+                        delegate?.dataAvailable(source: self, data: data)
+
+                        print("ERROR ")
                     }
                 } else {
                     delegate?.dataAvailable(source: self, data: data)
