@@ -5,17 +5,17 @@ import UIKit
 import AppKit
 #endif
 
-final class DisplayLink {
+public final class DisplayLink {
 
     private var displayLink: DisplayLinkPlatform?
 
-    var isPaused: Bool = true {
+    public var isPaused: Bool = true {
         didSet {
             displayLink?.isPaused = isPaused
         }
     }
 
-    init(onTick: @escaping (DisplayLinkFrame) -> Void) {
+    public init(onTick: @escaping (DisplayLinkFrame) -> Void) {
         displayLink = DisplayLinkPlatform()
 
         displayLink?.onTick = onTick
@@ -25,12 +25,12 @@ final class DisplayLink {
         deactivate()
     }
 
-    func activate() {
+    public func activate() {
         displayLink?.activate()
         self.isPaused = false
     }
 
-    func deactivate() {
+    public func deactivate() {
         displayLink?.deactivate()
         isPaused = true
     }
