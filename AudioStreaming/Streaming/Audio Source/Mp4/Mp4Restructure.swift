@@ -164,6 +164,9 @@ final class Mp4Restructure {
                     return nil
                 } else if !foundMoov && foundMdat {
                     Logger.debug("🕵️ detected an non-optimized mp4", category: .generic)
+                    // temporary to test turning off optimization
+                    return nil
+                    
                     let possibleMoovOffset = Int(atomOffset) + atomSize
                     return Mp4OptimizeInfo(moovOffset: possibleMoovOffset,
                                            moovSize: atomSize)
