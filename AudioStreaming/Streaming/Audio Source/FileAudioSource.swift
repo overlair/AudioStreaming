@@ -120,12 +120,12 @@ final class FileAudioSource: NSObject, CoreAudioStreamSource {
             if isMp4, !mp4IsAlreadyOptimized {
                 if !mp4Restructure.dataOptimized {
                     do {
-//                        if let mp4OptimizeInfo = try mp4Restructure.checkIsOptimized(data: data) {
-//                            try performMp4Restructure(inputStream: inputStream, mp4OptimizeInfo: mp4OptimizeInfo)
-//                        } else {
+                        if let mp4OptimizeInfo = try mp4Restructure.checkIsOptimized(data: data) {
+                            try performMp4Restructure(inputStream: inputStream, mp4OptimizeInfo: mp4OptimizeInfo)
+                        } else {
                             mp4IsAlreadyOptimized = true
                             delegate?.dataAvailable(source: self, data: data)
-//                        }
+                        }
                     } catch {
                         delegate?.errorOccurred(source: self, error: error)
                     }
